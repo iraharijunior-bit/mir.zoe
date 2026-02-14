@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>MIR JUNIOR · orla</title>
+ <!-- Fonts & Icons -->
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Quicksand:wght@300;400;600&family=Sacramento&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+ <style>
+ * {
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+ }
+
+ body {
+ min-height: 100vh;
+ background: #fce4ec;
+ background: radial-gradient(circle at 30% 30%, #ffe2ed, #fbaac4);
+ font-family: 'Quicksand', sans-serif;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ transition: background 0.4s ease;
+ position: relative;
+ overflow-x: hidden;
+ }
+
+ /* floating container (starts hidden) */
+ .floating-container {
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ pointer-events: none;
+ z-index: 5;
+ overflow: hidden;
+ visibility: hidden;
+ }
+
+ .float-item {
+ position: absolute;
+ font-size: 2rem;
+ opacity: 0;
+ animation: floatUp 12s linear infinite;
+ color: #ffb0c9;
+ filter: drop-shadow(0 0 15px #ff3f7a);
+ user-select: none;
+ pointer-events: none;
+ }
+
+ @keyframes floatUp {
+ 0% {
+ transform: translateY(100vh) rotate(0deg);
+ opacity: 0.8;
+ }
+ 100% {
+ transform: translateY(-20vh) rotate(360deg);
+ opacity: 0.2;
+ }
+ }
+
+ /* GATE STYLES */
+ .glass-panel {
+ background: rgba(255, 240, 250, 0.5);
+ backdrop-filter: blur(14px);
+ -webkit-backdrop-filter: blur(14px);
+ border-radius: 56px;
+ border: 1px solid rgba(255, 200, 230, 0.7);
+ box-shadow: 0 30px 50px -20px rgba(190, 70, 110, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+ padding: 2.8rem 2.2rem;
+ width: 90%;
+ max-width: 580px;
+ transition: all 0.3s ease;
+ position: relative;
+ z-index: 20;
+ }
+
+ .gate-container {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ text-align: center;
+ color: #4d1e2f;
+ }
+ .gate-container h1 {
+ font-weight: 500;
+ font-size: 2.8rem;
+ letter-spacing: 1px;
+ margin-bottom: 0.5rem;
+ text-shadow: 0 4px 15px #ffb0d0;
+ color: #7a2a4a;
+ font-family: 'Cormorant Garamond', serif;
+ }
+ .gate-container h1 i {
+ color: #dd4b7a;
+ margin: 0 12px;
+ filter: drop-shadow(0 0 8px #ff82b0);
+ }
+ .gate-container p {
+ font-weight: 400;
+ font-size: 1.3rem;
+ margin-bottom: 2.8rem;
+ color: #601f38;
+ }
+ .password-box {
+ width: 100%;
+ margin: 1.2rem 0;
+ }
+ .password-input {
+ width: 100%;
+ padding: 18px 30px;
+ border: none;
+ border-radius: 60px;
+ background: rgba(255, 255, 255, 0.6);
+ backdrop-filter: blur(8px);
+ border: 1px solid rgba(200, 90, 130, 0.5);
+ font-size: 1.3rem;
+ color: #3c1022;
+ outline: none;
+ transition: 0.25s;
+ text-align: center;
+ letter-spacing: 2px;
+ font-weight: 600;
+ }
+ .password-input::placeholder {
+ color: rgba(120, 40, 70, 0.6);
+ font-weight: 400;
+ }
+ .password-input:focus {
+ border-color: #ff94b6;
+ box-shadow: 0 0 20px #ff6699, inset 0 0 10px #ffb6d9;
+ }
+ .enter-btn {
+ background: linear-gradient(135deg, #ff80a5, #ffb0c9);
+ border: none;
+ border-radius: 60px;
+ padding: 16px 44px;
+ margin: 30px 0 10px;
+ font-size: 1.6rem;
+ font-weight: 700;
+ color: #2d0b16;
+ letter-spacing: 2px;
+ box-shadow: 0 15px 30px -8px #cc5580, 0 0 0 1px rgba(255,220,240,0.9);
+ cursor: pointer;
+ transition: 0.2s;
+ width: fit-content;
+ border: 1px solid #ffe2ed;
+ }
+ .enter-btn:hover {
+ transform: scale(1.04);
+ background: linear-gradient(135deg, #ff95b8, #ffc2d9);
+ box-shadow: 0 20px 35px -5px #e6739f;
+ }
+ .error-message {
+ min-height: 2.5rem;
+ color: #a1314b;
+ font-weight: 600;
+ text-shadow: 0 2px 5px #ffd0dd;
+ margin: 5px 0;
+ }
+
+ /* SELF-DRAWING HEART CANVAS */
+ #heartCanvas {
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 100vw;
+ height: 100vh;
+ pointer-events: none;
+ z-index: 30;
+ display: none;
+ }
+
+ /* MAIN PAGE (hidden initially) */
+ .grace-page {
+ display: none;
+ width: 100%;
+ max-width: 900px;
+ padding: 1.8rem;
+ animation: softAppear 1s cubic-bezier(0.16, 1, 0.3, 1);
+ position: relative;
+ z-index: 25;
+ }
+ @keyframes softAppear {
+ 0% { opacity: 0; transform: scale(0.96) translateY(20px); }
+ 100% { opacity: 1; transform: scale(1) translateY(0); }
+ }
+
+ .main-inner {
+ background: rgba(255, 240, 250, 0.6);
+ backdrop-filter: blur(20px);
+ border-radius: 70px;
+ padding: 2.8rem 2.5rem;
+ border: 1px solid rgba(255, 220, 240, 0.9);
+ box-shadow: 0 30px 60px -15px #b34d73;
+ }
+
+ .grace-header {
+ text-align: center;
+ margin-bottom: 2rem;
+ }
+ .grace-header h2 {
+ font-size: 4rem;
+ font-weight: 700;
+ font-family: 'Cormorant Garamond', serif;
+ background: linear-gradient(145deg, #a13860, #691f3e);
+ -webkit-background-clip: text;
+ background-clip: text;
+ color: transparent;
+ text-shadow: 0 0 25px #ffa5c3;
+ letter-spacing: 1px;
+ }
+ .grace-header h2 i {
+ color: #c04e7a;
+ margin: 0 15px;
+ font-size: 3.4rem;
+ filter: drop-shadow(0 0 15px #ff4785);
+ }
+
+ /* Letter card */
+ .letter-card {
+ background: rgba(255, 240, 255, 0.8);
+ backdrop-filter: blur(16px);
+ border: 2px solid #ffb8d4;
+ border-radius: 60px;
+ padding: 2rem 2.2rem;
+ margin: 30px 0 20px;
+ cursor: pointer;
+ transition: 0.3s;
+ text-align: center;
+ box-shadow: 0 25px 40px -14px #b34272;
+ }
+ .letter-card:hover {
+ transform: scale(1.02);
+ border-color: #ff8fc7;
+ box-shadow: 0 35px 50px -10px #e83e7c;
+ }
+ .letter-card i {
+ font-size: 4rem;
+ background: linear-gradient(135deg, #c44574, #9f2d58);
+ -webkit-background-clip: text;
+ background-clip: text;
+ color: transparent;
+ margin-bottom: 1rem;
+ }
+ .letter-card h3 {
+ font-size: 2.8rem;
+ font-family: 'Cormorant Garamond', serif;
+ color: #4a1b2f;
+ }
+ .letter-card p {
+ font-size: 1.3rem;
+ color: #652d45;
+ }
+
+ /* Letter display */
+ .letter-paper {
+ background: rgba(255, 250, 250, 0.9);
+ backdrop-filter: blur(4px);
+ border-radius: 48px;
+ padding: 2.5rem;
+ border: 1px solid #ffbfd7;
+ box-shadow: inset 0 0 30px #ffe5f0, 0 25px 40px -15px #8f3e60;
+ margin: 30px 0 40px;
+ font-family: 'Cormorant Garamond', serif;
+ }
+
+ .letter-content {
+ font-size: 1.5rem;
+ line-height: 1.6;
+ color: #2c0d1b;
+ white-space: pre-line;
+ font-weight: 500;
+ }
+
+ /* NEW POSTER: Girl of the day -- orla❤️‍🔥 -- */
+ .poster-grace {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ margin: 40px 0 20px;
+ padding: 3rem 2rem;
+ background: linear-gradient(145deg, #ffd9e6, #ffb3c6);
+ border-radius: 80px 80px 40px 40px;
+ border: 4px solid #ff8cb0;
+ box-shadow: 0 0 70px #ff5c8e, 0 20px 40px -5px #b34272;
+ text-align: center;
+ transform: scale(1);
+ transition: 0.3s;
+ }
+
+ .poster-grace:hover {
+ transform: scale(1.02);
+ box-shadow: 0 0 100px #ff3070, 0 25px 50px -5px #a13058;
+ }
+
+ .poster-title {
+ font-size: 3.5rem;
+ font-weight: 300;
+ letter-spacing: 8px;
+ color: #3d1424;
+ font-family: 'Quicksand', sans-serif;
+ text-transform: uppercase;
+ background: rgba(255,255,240,0.3);
+ padding: 0.3rem 2rem;
+ border-radius: 50px;
+ backdrop-filter: blur(4px);
+ }
+
+ .poster-name {
+ font-size: 7rem;
+ font-weight: 700;
+ font-family: 'Sacramento', cursive;
+ color: #591c36;
+ line-height: 1.2;
+ text-shadow: 0 4px 20px #ffb8d4, 0 8px 30px #ff3070;
+ margin: 0.5rem 0 0.2rem;
+ }
+
+ .poster-sub {
+ font-size: 2.2rem;
+ color: #681f40;
+ font-style: italic;
+ border-top: 3px dashed #ff82ad;
+ padding-top: 0.8rem;
+ width: 80%;
+ }
+
+ .poster-star {
+ font-size: 2.5rem;
+ color: #ffdc00;
+ filter: drop-shadow(0 0 15px gold);
+ margin: 10px 0;
+ }
+
+ .signature {
+ text-align: center;
+ color: #712b49;
+ font-weight: 500;
+ margin-top: 30px;
+ font-size: 1.2rem;
+ }
+
+ /* hidden audio */
+ #bgMusic {
+ display: none;
+ }
+ </style>
+</head>
+<body>
+
+ <!-- floating items container (hidden initially) -->
+ <div class="floating-container" id="floatingContainer"></div>
+
+ <!-- Canvas for self-drawing heart + name -->
+ <canvas id="heartCanvas"></canvas>
+
+ <!-- GATE: password "zoe" (changed) -->
+ <div id="gatePanel" class="glass-panel gate-container">
+  <h1><i class="fas fa-heart"></i> MIR JUNIOR <i class="fas fa-heart"></i></h1>
+  <p>.......</p>
+  <div class="password-box">
+    <input type="password" id="passwordInput" class="password-input" placeholder="• • • • • •" autofocus>
+  </div>
+  <button class="enter-btn" id="enterBtn"><i class="fas fa-lock-open"></i> open</button>
+  <div id="errorMsg" class="error-message"></div>
+  <div style="margin-top: 20px; opacity: 0.8;">❤️ type the secret word ❤️</div>
+ </div>
+
+ <!-- MAIN PAGE (orla❤️‍🔥) - hidden initially -->
+ <div id="gracePage" class="grace-page">
+  <div class="main-inner">
+    <div class="grace-header">
+      <!-- changed: Pookie? lol → MIR JUNIOR -->
+      <h2><i class="fas fa-heart"></i> MIR JUNIOR <i class="fas fa-heart"></i></h2>
+    </div>
+
+    <!-- Letter card -->
+    <div class="letter-card" id="showLetterCard">
+      <i class="fas fa-envelope-open-heart"></i>
+      <h3>a letter for you</h3>
+      <p>touch to open THE WORDS..!</p>
+    </div>
+
+    <!-- Letter display (updated with new content) -->
+    <div id="letterDisplay" class="letter-paper" style="display: none;">
+      <div class="letter-content" id="letterText"></div>
+    </div>
+
+    <!-- NEW POSTER: Girl of the day -- orla❤️‍🔥 (Allbright replaced) -->
+    <div class="poster-grace" id="posterGrace">
+      <div class="poster-star"><i class="fas fa-star"></i> <i class="fas fa-star"></i> <i class="fas fa-star"></i></div>
+      <div class="poster-title">girl of the day</div>
+      <div class="poster-name">orla❤️‍🔥</div>
+      <div class="poster-sub">— my Valentine —</div>
+      <div class="poster-star"><i class="fas fa-heart"></i> <i class="fas fa-heart"></i> <i class="fas fa-heart"></i></div>
+    </div>
+
+    <div class="signature">
+      <i class="far fa-heart"></i> with all my heart, yours <i class="far fa-heart"></i>
+    </div>
+  </div>
+ </div>
+
+ <!-- Background music (Raindance by Dave) -->
+ <audio id="bgMusic" loop>
+  <source src="Dave - Raindance (ft. Tems) - Santan Dave.mp3" type="audio/mpeg">
+  <!-- fallback same source -->
+ </audio>
+ <script>
+ (function() {
+  // UPDATED PASSWORD: "zoe"
+  const SECRET_PASSWORD = "zoe";
+
+  // Gate elements
+  const gate = document.getElementById('gatePanel');
+  const gracePage = document.getElementById('gracePage');
+  const passwordInput = document.getElementById('passwordInput');
+  const enterBtn = document.getElementById('enterBtn');
+  const errorMsg = document.getElementById('errorMsg');
+  const body = document.body;
+
+  // Audio
+  const bgMusic = document.getElementById('bgMusic');
+  let musicStarted = false;
+
+  // Floating container
+  const floatingContainer = document.getElementById('floatingContainer');
+  const symbols = ['🌹', '❤️', '🌸', '💖', '🌺', '💘', '🏵️', '💕', '🌷', '💗', '🥀', '💓'];
+  
+  function createFloatingItem() {
+    const item = document.createElement('div');
+    item.className = 'float-item';
+    const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+    item.textContent = randomSymbol;
+    const size = Math.floor(Math.random() * 30 + 20);
+    item.style.fontSize = size + 'px';
+    item.style.left = Math.random() * 100 + '%';
+    item.style.animationDuration = (Math.random() * 10 + 8) + 's';
+    item.style.animationDelay = Math.random() * -10 + 's';
+    floatingContainer.appendChild(item);
+    setTimeout(() => item.remove(), 20000);
+  }
+
+  let floatInterval;
+  function startFloating() {
+    if (floatInterval) clearInterval(floatInterval);
+    for (let i = 0; i < 25; i++) {
+      setTimeout(() => createFloatingItem(), i * 70);
+    }
+    floatInterval = setInterval(createFloatingItem, 400);
+    floatingContainer.style.visibility = 'visible';
+  }
+
+  // Heart + name drawing on canvas (now draws "orla❤️‍🔥"? but we keep Grace? we change it to "orla❤️‍🔥")
+  const canvas = document.getElementById('heartCanvas');
+  const ctx = canvas.getContext('2d');
+  
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  // Updated: draw name "orla❤️‍🔥" inside heart (instead of Allbright / Grace)
+  function drawHeartWithName(progress, nameProgress) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw heart outline
+    ctx.strokeStyle = '#ff3b6f';
+    ctx.lineWidth = 6;
+    ctx.shadowColor = '#ff80b0';
+    ctx.shadowBlur = 20;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const size = Math.min(canvas.width, canvas.height) * 0.35;
+    
+    // parametric heart
+    const points = [];
+    const steps = 100;
+    for (let i = 0; i <= steps; i++) {
+      const t = (i / steps) * 2 * Math.PI;
+      const x = 16 * Math.pow(Math.sin(t), 3);
+      const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+      points.push({ x, y });
+    }
+    
+    const scaled = points.map(p => ({
+      x: centerX + (p.x / 20) * size,
+      y: centerY + (p.y / 20) * size
+    }));
+    
+    // Draw heart up to progress
+    const drawTo = Math.floor(steps * progress);
+    ctx.beginPath();
+    ctx.moveTo(scaled[0].x, scaled[0].y);
+    for (let i = 1; i <= drawTo; i++) {
+      ctx.lineTo(scaled[i].x, scaled[i].y);
+    }
+    ctx.stroke();
+
+    // If heart is complete (progress >= 1), draw the name "orla❤️‍🔥" inside with its own progress
+    if (progress >= 1) {
+      ctx.shadowColor = '#ff3070';
+      ctx.shadowBlur = 25;
+      ctx.font = `italic bold ${80 * nameProgress}px 'Sacramento', cursive`;
+      ctx.fillStyle = '#ff2b5e';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('orla❤️‍🔥', centerX, centerY - 10);
+    }
+  }
+
+  // Animation: first draw heart (3 sec), then write name (2 sec)
+  function startHeartDrawing(callback) {
+    canvas.style.display = 'block';
+    let heartStart = null;
+    let nameStart = null;
+    let heartDone = false;
+    const heartDuration = 3000; // 3 sec
+    const nameDuration = 2000; // 2 sec
+    
+    function animate(timestamp) {
+      if (!heartStart) heartStart = timestamp;
+      const heartElapsed = timestamp - heartStart;
+      const heartProgress = Math.min(heartElapsed / heartDuration, 1);
+      
+      if (!heartDone) {
+        // drawing heart
+        drawHeartWithName(heartProgress, 0);
+        if (heartProgress >= 1) {
+          heartDone = true;
+          nameStart = timestamp; // start name timer
+        }
+        requestAnimationFrame(animate);
+      } else {
+        // drawing name
+        const nameElapsed = timestamp - nameStart;
+        const nameProgress = Math.min(nameElapsed / nameDuration, 1);
+        drawHeartWithName(1, nameProgress);
+        
+        if (nameProgress >= 1) {
+          // both done, wait a bit then hide canvas and proceed
+          setTimeout(() => {
+            canvas.style.display = 'none';
+            if (callback) callback();
+          }, 500);
+        } else {
+          requestAnimationFrame(animate);
+        }
+      }
+    }
+    
+    requestAnimationFrame(animate);
+  }
+
+  // Play music
+  function playMusic() {
+    bgMusic.play().catch(e => console.log('Music play prevented', e));
+  }
+
+  // Grant access: hide gate, start heart+name drawing, THEN floating and page
+  function grantAccess() {
+    // start music
+    if (!musicStarted) {
+      playMusic();
+      musicStarted = true;
+    } else {
+      bgMusic.play();
+    }
+
+    // hide gate immediately
+    gate.style.display = 'none';
+
+    // start heart drawing (heart then "orla❤️‍🔥")
+    startHeartDrawing(() => {
+      // after heart+name finishes, start floating items
+      startFloating();
+      // then show main page
+      gracePage.style.display = 'block';
+      body.style.background = 'radial-gradient(circle at 20% 30%, #ffe9f2, #ffb7cf)';
+    });
+  }
+
+  // Password check
+  function checkPasswordAndEnter() {
+    const entered = passwordInput.value;
+    if (entered === SECRET_PASSWORD) {
+      errorMsg.innerHTML = '';
+      grantAccess();
+    } else {
+      errorMsg.innerHTML = '✘ only "zoe" opens the heart ✘';
+      passwordInput.style.borderColor = '#ff5982';
+      passwordInput.value = '';
+      passwordInput.focus();
+    }
+  }
+
+  enterBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    checkPasswordAndEnter();
+  });
+
+  passwordInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      checkPasswordAndEnter();
+    } else {
+      errorMsg.innerHTML = '';
+      passwordInput.style.borderColor = 'rgba(200, 80, 120, 0.5)';
+    }
+  });
+
+  window.addEventListener('load', () => passwordInput.focus());
+
+  // UPDATED LETTER CONTENT (as requested)
+  const fullLetter = `Happy Valentine’s Day, Terah ❤️
+
+I just want to take this day to tell you how much you really mean to me. Even if I don’t always say it perfectly, I care about you a lot. Having you in my life makes my days feel better and lighter. When I talk to you, I feel happy. When I think about you, I smile without even trying.
+
+Terah, you are such a special person. I love your personality, your smile, and the way you make me feel. You have a beautiful heart, and that’s one of the things I admire most about you. The way you care, the way you talk, and even the little things you do mean more to me than you know.
+
+I know we’re still growing and learning each other, but what we have matters to me. I don’t take you for granted. I appreciate every conversation, every laugh, every moment we share. Even the simple “good morning” and “good night” messages mean a lot to me.
+
+You bring peace to my mind and happiness to my heart. You make me want to be better, to do better, and to treat you the way you deserve. I respect you, I value you, and I’m really thankful for you.
+
+Terah, today is about love, but honestly, I appreciate you every single day. I’m glad we found each other. I’m glad we talk. I’m glad you’re mine. And I hope you always remember how important you are to me and how much you are loved.
+
+Happy Valentine’s Day, Terah 🤍❤️`;
+
+  const showLetterCard = document.getElementById('showLetterCard');
+  const letterDisplay = document.getElementById('letterDisplay');
+  const letterText = document.getElementById('letterText');
+  letterText.innerText = fullLetter;
+
+  showLetterCard.addEventListener('click', () => {
+    if (letterDisplay.style.display === 'none' || letterDisplay.style.display === '') {
+      letterDisplay.style.display = 'block';
+      letterDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      letterDisplay.style.display = 'none';
+    }
+  });
+
+ })();
+ </script>
+</body>
+</html>
